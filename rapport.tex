@@ -195,12 +195,12 @@ By a well chosen correlation, we hope that this will reduce the variance of our 
 of our estimation. 
 
 \par One of the known way of generate a good correlation, is to use stratified sample, like 
-a Sobol sequence, Halton sequence or Heimmersley Sequence. The idea
+a Sobol sequence, Halton sequence or Hammersley Sequence. The idea
 of stratified sampling is to distribute the sample all over the space.
 
 For simple integrals, the stratified sampler gives provably lower error and 
 faster asymptotic convergence \cite{10.1145/237170.237265}. And empirically,
-stratified samplesr also give better rate of convergence for complex integrals that
+stratified samplers also give better rate of convergence for complex integrals that
 occur in rendering \cite{renderman}.
 
 \paragraph*{Summary} What is important to remember to understand this work is that 
@@ -209,7 +209,7 @@ Sobol \cite{renderman} to produce random points. And those random points are cor
 
 \subsection{Adaptative Sampling}
 
-\par Lets $P$ be the number of pixels in the image and, $I^{(p)}$ the integral of the pixel $p$. 
+\par Let $P$ be the number of pixels in the image and, $I^{(p)}$ the integral of the pixel $p$. 
 When producing an image, we have $P$ integral to compute, one for each pixel, and we have a
 global budget $B$ that correspond the total number sample we will compute in the entire 
 image. And as simulating a photon path (caracterized by the sample) take about the 
@@ -235,7 +235,7 @@ satisfy $\sum_{p} n_p = B$. Here is below chat look a typical sampling map:
 
 
 \par The one million dollar question is then, for a scene $X$, how to find the optimal
-sampling map $n$. Before explaining what is an optimal sampling, lets introduce our notation:
+sampling map $n$. Before explaining what is an optimal sampling, let introduce our notation:
 \begin{itemize}
     \item $B$ is the global budget, corresponding to the total number photon path simulated
     in order to render the image.
@@ -273,7 +273,7 @@ scenes is:
 \end{equation}
 
 The goal of this intership was notably to find good sampling function, as close as 
-possible as the optimal sampling function. But before, lets looks a the state of the art.
+possible as the optimal sampling function. But before, let's looks a the state of the art.
 
 \subsection{State of the art}
 
@@ -672,13 +672,17 @@ function $\Sm_{min}$.
         sampling map & image & RMSE=0.193
     \end{tabular}
 \end{figure}
-
+{\color{red} TO DO : comment the result and add another scene}
 
 \paragraph*{Discussion} To conclude this section, we haven't managed 
-to make this idea work. Maybe with more data we could get a good 
-enough result. Or simply, with an image with low spp, we probably 
-don't have enough information to deduce the convergence rate of 
-the error, and thus this idea was doomed to failure.
+to make this idea fully work, but the idea is promising. Maybe with more
+ data we could get a better result. Or simply, with an image with low 
+ spp, we probably on't have enough information to deduce the 
+ convergence rate of the error, and we can't get something any better. 
+ 
+\par Finnally, we decide to switch to the next idea, as we thought that
+this idea would ultimatly produce worst result than method that directly
+optimize to get a good sampling function that work with a denoiser.
 
 \section{Adaptive sampling by direct optimisation}
 
@@ -897,7 +901,7 @@ the report now.
 
 \subsection{Combination of statistic} \label{combi}
 As described in \cite{Chan1983AlgorithmsFC} we can combine statistics easly.
-Lets $A$ be a set of sample and for $a\in A$, lets $x_a$ be an observation. We note: 
+let $A$ be a set of sample and for $a\in A$, let $x_a$ be an observation. We note: 
 \[E(A) = \frac{\sum_{a\in A} x_a}{|A|}, \qquad V(A) = \frac{\sum_{a\in A} (E(A) - x_a)^2}{|A|}\]
 We then have the following formula to combine $A, B$ two set of sample:
 \[E(A\cup B) = \frac{|A|\times I(A) + |B|\times I(B)}{|A|+|B|}\]
