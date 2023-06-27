@@ -273,7 +273,7 @@ scenes is:
 \end{equation}
 
 The goal of this intership was notably to find good sampling function, as close as 
-possible as the optimal sampling function. But before, let's looks a the state of the art.
+possible as the optimal sampling function. But before, let's looks at the state of the art.
 
 \subsection{State of the art}
 
@@ -340,7 +340,7 @@ renderer, and in their article they have a great schema that illustrate this met
 I will now brevly explain what are their fake renderer and how they work.
 
 \par In DARS \cite{kuznetsov2018deep}, their fake renderer is $\R_{c}$ that renders 
-new image by combining image from different spp. Using the fact that 
+new image by combining image from different numebr of samples per pixel. Using the fact that 
 for uniformly independent sample, we have:
 \[ \R(X,n+m) = \frac{n\R(X,n) + m\R(X,m)}{n+m} \]
 Note that this is an equality on random variable. In other words, by taking two 
@@ -357,7 +357,7 @@ where $g(n,i)$ is the binary value of the i-th lowest bit of $n$.
 
 \par And more recently, \cite{10.1145/3550454.3555515} used a different fake 
   renderer $R_{a}$ that renders new images by generating
-  new samples from a gamma function that has good properties. They proved
+  new samples from a learned per pixel gamma function that has good properties. They proved
   that with a uniformly independent sample, we only need a second order 
   approximation of the renderer to make the gradient descend. So a well 
   chosen gamma function can be used to simulate a renderer. They chose a 
@@ -426,11 +426,11 @@ we can do different type of sampling function. Two examples are given in
 the next subsection.
 
 
-\subsubsection{Minimal error excpectation}
+\subsubsection{Minimal error expectation}
 \paragraph*{Goal} The goal, is to have a sampling function $\Sm_{min}$ that produce
  an image with globally minimal error. That minimise the sum of error of each pixel.
 
-\par By doing some optimisation, we can also use a stupid algorithm 
+\par By doing some optimisation, we can also use a straightforward algorithm 
 to optimise the average error with $P$ being the total number 
 of pixels. To do this, we introduce two functions:
 
@@ -481,7 +481,7 @@ The result of this algo is this sample map:
 
 \subsubsection{Equal error expectation}
 
-\paragraph*{Goal} We may want to do other things that just minimizing the global error, 
+\paragraph*{Goal} We may want to do other things that just minimising the global error, 
 like having a sampling function $\Sm_{equal}$ 
 that produce an image where each pixel integration as the same expectation of error. 
 
@@ -536,7 +536,7 @@ a huge computational power.
 
 \subsubsection{Theoretical Error comparaison}
 
-Because it's fun, we can look at side by side the error map for a scene of 
+Because it's fun, we can make a side by side comparison of the error map for a scene of 
 two sampling function $\Sm_{min}(X), \Sm_{equal}(X)$ with the error map
 of the default sampling function $\Sm_{uni}(X)$ that always output $\bar m$.
 
@@ -664,25 +664,42 @@ And here what append when I use these prediction of $a$ and $b$ with the samplin
 function $\Sm_{min}$.
 \begin{figure}[H]
     \centering
-    \caption{Sampling map and the corresponding error of $\Sm_{min}$ using the prediction of $a$ and $b$}
-    \begin{tabular}{ccc}
-        \includegraphics[width=45mm]{image/without/psm.png}
-        & \includegraphics[width=45mm]{image/without/pimage.png}
-        & \includegraphics[width=45mm]{image/without/perror.png} \\
-        sampling map & image & RMSE=0.193
+    \caption{Comparaison of $\Sm_{min}$ using the prediction of $a$ and $b$, with $\Sm_{uni}$}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        Scene & $\Sm_{min}$ & $\Sm_{min}$ error & $\Sm_{uni}$ error\\
+        \hline
+        \includegraphics[width=35mm]{image/without/pimage.png}
+        & \includegraphics[width=35mm]{image/without/psm.png}
+        & \includegraphics[width=35mm]{image/without/perror.png}
+        & \includegraphics[width=35mm]{image/without/RMSE_uni.png} \\
+         &  & RMSE=0.193 & RMSE=0.196 \\
+        \hline
+        \includegraphics[width=35mm]{image/without/ppgt.png}
+        & \includegraphics[width=35mm]{image/without/ppsm.png}
+        & \includegraphics[width=35mm]{image/without/ppp.png}
+        & \includegraphics[width=35mm]{image/without/pp_norm.png} \\
+         &  & RMSE=0.257 & RMSE=0.252 \\
+        \hline
     \end{tabular}
 \end{figure}
-{\color{red} TO DO : comment the result and add another scene}
+In the first scene we have a improvement in the error, but in the second scene, we do 
+even worst than with the default sampling function $\Sm_{uni}$. To summarize, our
+prediction of $a$ and $b$ combined with out $\Sm_{min}$ doesn't always reduce 
+the error.
 
-\paragraph*{Discussion} To conclude this section, we haven't managed 
-to make this idea fully work, but the idea is promising. Maybe with more
- data we could get a better result. Or simply, with an image with low 
- spp, we probably on't have enough information to deduce the 
- convergence rate of the error, and we can't get something any better. 
- 
-\par Finnally, we decide to switch to the next idea, as we thought that
-this idea would ultimatly produce worst result than method that directly
-optimize to get a good sampling function that work with a denoiser.
+\paragraph*{Discussion} We haven't managed to make this idea fully work, 
+ but the idea is promising. Maybe with more data we could get a better result. 
+ Or maybe, with an image with low number of sample, we probably don't have 
+ enough information to deduce the parameter $a$ and $b$, and we can't get 
+ something any better even with more training. 
+
+\paragraph*{Perspective} To continue this section, we could have try to increass
+the size of the dataset, or improve the quality of our groundtruth $a$ and $b$, by maybe 
+a better regression algorithm. Or maybe try a different neural network architecture.
+
+\par This conclude the first part of my work during the intership.
+
 
 \section{Adaptive sampling by direct optimisation}
 
