@@ -765,19 +765,21 @@ different fake renderer in order to work with stratified samples.
 
 \subsection{The derivation issue}
 
-Let's take a closer look at the derivation of \label{eq:4}:
+With stratified samples, we have another issue.
+Let's take a closer look at the derivation of the equation \ref{eq:4}:
 \begin{align*}
     \label{eq:4}
  \frac{\partial \R(X,s)}{\partial s} & = \E_h \left [\frac{\R(X,s+h) - \R(X,s)}{h} \right ] \\
     & = \E_h \left [\frac{(s\R(X,s) + h\R(X,h | s))/(s+h) - \R(X,s)}{h}\right ] \\
     & = \frac{\E_h \left [\R(X,h | s) \right ] - \R(X,s)}{s+h} \\
-    & = ???
+    & =\:???
 \end{align*}
 The issue we have, is that $\E_h \left [\R(X,h | s) \right ]$ not only is not $X_\infty$ 
-but also depends on $h$.
+but also depends on $h$. In pratice, we don't really know what is this expectation, so we
+shouldn't really apply this technique to compute gradient.
 
 \paragraph*{Confession of weakness} We know that we have this issue, but we haven't found 
-a way to get a better result than the approximation that 
+a way to get a better final result, than with the approximation that 
 $\E_h \left [\R(X,h | s) \right ] = X_\infty$. And this could be explained by the fact that 
 even if this approximation is not true, the direction of the gradient is still good 
 enough, and so the network converges in the good direction.
@@ -798,8 +800,8 @@ $2^i$. The way to compute this from $X_{2^i}$ and $X_{2^{i+1}}$ is described in 
 
 \paragraph*{Discussion} This interpolation has many flaws, but it seems to be 
  the best way to approximation of the true renderer, that take into 
- account the fact that our samples are stratified.. $\E[R_i(X,n)] \approx \E[R(X,n)]$. 
- And $\V[R_i(X,n)] \approx \V[R(X,n)]$.
+ account the fact that our samples are stratified. We have 
+ $\E[R_i(X,n)] \approx \E[R(X,n)]$ and $\V[R_i(X,n)] \approx \V[R(X,n)]$.
 
 \subsection{Implementation Details}
 
