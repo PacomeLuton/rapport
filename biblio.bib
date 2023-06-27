@@ -1,0 +1,164 @@
+@article{Chan1983AlgorithmsFC,
+  title={Algorithms for Computing the Sample Variance: Analysis and Recommendations},
+  author={Tony F. Chan and Gene H. Golub and Randall J. LeVeque},
+  journal={The American Statistician},
+  year={1983},
+  volume={37},
+  pages={242-247}
+}
+
+@article{kuznetsov2018deep,
+    title={Deep Adaptive Sampling for Low Sample Count Rendering},
+    author={Alexandr Kuznetsov and Nima Khademi Kalantari and Ravi Ramamoorthi},
+    journal = {Computer Graphics Forum},
+    year={2018},
+    volume={37},
+    pages={35-44},
+    publisher = {The Eurographics Association and John Wiley & Sons Ltd.}
+}
+
+@article{10.1145/3550454.3555515,
+author = {Salehi, Farnood and Manzi, Marco and Roethlin, Gerhard and Weber, Romann and Schroers, Christopher and Papas, Marios},
+title = {Deep Adaptive Sampling and Reconstruction Using Analytic Distributions},
+year = {2022},
+issue_date = {December 2022},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {41},
+number = {6},
+issn = {0730-0301},
+url = {https://doi.org/10.1145/3550454.3555515},
+doi = {10.1145/3550454.3555515},
+abstract = {We propose an adaptive sampling and reconstruction method for offline Monte Carlo rendering. Our method produces sampling maps constrained by a user-defined budget that minimize the expected future denoising error. Compared to other state-of-the-art methods, which produce the necessary training data on the fly by composing pre-rendered images, our method samples from analytic noise distributions instead. These distributions are compact and closely approximate the pixel value distributions stemming from Monte Carlo rendering. Our method can efficiently sample training data by leveraging only a few per-pixel statistics of the target distribution, which provides several benefits over the current state of the art. Most notably, our analytic distributions' modeling accuracy and sampling efficiency increase with sample count, essential for high-quality offline rendering. Although our distributions are approximate, our method supports joint end-to-end training of the sampling and denoising networks. Finally, we propose the addition of a global summary module to our architecture that accumulates valuable information from image regions outside of the network's receptive field. This information discourages sub-optimal decisions based on local information. Our evaluation against other state-of-the-art neural sampling methods demonstrates denoising quality and data efficiency improvements.},
+journal = {ACM Trans. Graph.},
+month = {nov},
+articleno = {259},
+numpages = {16},
+keywords = {denoising, path tracing, adaptive sampling}
+}
+
+@misc{elek2019learning,
+      title={Learning Patterns in Sample Distributions for Monte Carlo Variance Reduction}, 
+      author={Oskar Elek and Manu M. Thomas and Angus Forbes},
+      year={2019},
+      eprint={1906.00124},
+      archivePrefix={arXiv},
+      primaryClass={cs.GR}
+}
+
+@inproceedings{10.1145/237170.237265,
+author = {Mitchell, Don P.},
+title = {Consequences of Stratified Sampling in Graphics},
+year = {1996},
+isbn = {0897917464},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/237170.237265},
+doi = {10.1145/237170.237265},
+booktitle = {Proceedings of the 23rd Annual Conference on Computer Graphics and Interactive Techniques},
+pages = {277–280},
+numpages = {4},
+keywords = {sampling, discrepancy, variance reduction, antialiasing, stratification},
+series = {SIGGRAPH '96}
+}
+
+@misc{resources16,
+   Author = {Benedikt Bitterli},
+   Year = {2016},
+   Note = {https://benedikt-bitterli.me/resources/},
+   Title = {Rendering resources}
+} 
+
+@article{10.1145/3072959.3073708,
+author = {Bako, Steve and Vogels, Thijs and Mcwilliams, Brian and Meyer, Mark and Nov\'{a}K, Jan and Harvill, Alex and Sen, Pradeep and Derose, Tony and Rousselle, Fabrice},
+title = {Kernel-Predicting Convolutional Networks for Denoising Monte Carlo Renderings},
+year = {2017},
+issue_date = {August 2017},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {36},
+number = {4},
+issn = {0730-0301},
+url = {https://doi.org/10.1145/3072959.3073708},
+doi = {10.1145/3072959.3073708},
+abstract = {Regression-based algorithms have shown to be good at denoising Monte Carlo (MC) renderings by leveraging its inexpensive by-products (e.g., feature buffers). However, when using higher-order models to handle complex cases, these techniques often overfit to noise in the input. For this reason, supervised learning methods have been proposed that train on a large collection of reference examples, but they use explicit filters that limit their denoising ability. To address these problems, we propose a novel, supervised learning approach that allows the filtering kernel to be more complex and general by leveraging a deep convolutional neural network (CNN) architecture. In one embodiment of our framework, the CNN directly predicts the final denoised pixel value as a highly non-linear combination of the input features. In a second approach, we introduce a novel, kernel-prediction network which uses the CNN to estimate the local weighting kernels used to compute each denoised pixel from its neighbors. We train and evaluate our networks on production data and observe improvements over state-of-the-art MC denoisers, showing that our methods generalize well to a variety of scenes. We conclude by analyzing various components of our architecture and identify areas of further research in deep learning for MC denoising.},
+journal = {ACM Trans. Graph.},
+month = {jul},
+articleno = {97},
+numpages = {14},
+keywords = {global illumination, Monte Carlo denoising, Monte Carlo rendering}
+}
+
+@ARTICLE{5617283,
+  author={Ravishankar, Saiprasad and Bresler, Yoram},
+  journal={IEEE Transactions on Medical Imaging}, 
+  title={MR Image Reconstruction From Highly Undersampled k-Space Data by Dictionary Learning}, 
+  year={2011},
+  volume={30},
+  number={5},
+  pages={1028-1041},
+  doi={10.1109/TMI.2010.2090538}
+}
+
+@inproceedings {10.2312:sr.20211287,
+booktitle = {Eurographics Symposium on Rendering - DL-only Track},
+editor = {Bousseau, Adrien and McGuire, Morgan},
+title = {{Stochastic Generation of (t, s) Sample Sequences}},
+author = {Helmer, Andrew and Christensen, Per and Kensler, Andrew},
+year = {2021},
+publisher = {The Eurographics Association},
+ISSN = {1727-3463},
+ISBN = {978-3-03868-157-1},
+DOI = {10.2312/sr.20211287}
+}
+
+@article{renderman,
+author = {Christensen, Per and Fong, Julian and Shade, Jonathan and Wooten, Wayne and Schubert, Brenden and Kensler, Andrew and Friedman, Stephen and Kilpatrick, Charlie and Ramshaw, Cliff and Bannister, Marc and Rayner, Brenton and Brouillat, Jonathan and Liani, Max},
+title = {RenderMan: An Advanced Path-Tracing Architecture for Movie Rendering},
+year = {2018},
+issue_date = {June 2018},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {37},
+number = {3},
+issn = {0730-0301},
+url = {https://doi.org/10.1145/3182162},
+doi = {10.1145/3182162},
+abstract = {Pixar’s RenderMan renderer is used to render all of Pixar’s films and by many film studios to render visual effects for live-action movies. RenderMan started as a scanline renderer based on the Reyes algorithm, and it was extended over the years with ray tracing and several global illumination algorithms.This article describes the modern version of RenderMan, a new architecture for an extensible and programmable path tracer with many features that are essential to handle the fiercely complex scenes in movie production. Users can write their own materials using a bxdf interface and their own light transport algorithms using an integrator interface—or they can use the materials and light transport algorithms provided with RenderMan. Complex geometry and textures are handled with efficient multi-resolution representations, with resolution chosen using path differentials. We trace rays and shade ray hit points in medium-sized groups, which provides the benefits of SIMD execution without excessive memory overhead or data streaming. The path-tracing architecture handles surface, subsurface, and volume scattering. We show examples of the use of path tracing, bidirectional path tracing, VCM, and UPBP light transport algorithms. We also describe our progressive rendering for interactive use and our adaptation of denoising techniques.},
+journal = {ACM Trans. Graph.},
+month = {aug},
+articleno = {30},
+numpages = {21},
+keywords = {ray tracing, RenderMan, Pixar, complex scenes, global illumination, production rendering, computer-generated images, visual effects, path tracing}
+}
+
+@misc{kingma2017adam,
+      title={Adam: A Method for Stochastic Optimization}, 
+      author={Diederik P. Kingma and Jimmy Ba},
+      year={2017},
+      eprint={1412.6980},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+
+@article{10.1145/325165.325179,
+author = {Lee, Mark E. and Redner, Richard A. and Uselton, Samuel P.},
+title = {Statistically Optimized Sampling for Distributed Ray Tracing},
+year = {1985},
+issue_date = {Jul. 1985},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {19},
+number = {3},
+issn = {0097-8930},
+url = {https://doi.org/10.1145/325165.325179},
+doi = {10.1145/325165.325179},
+abstract = {Cook, Porter, and Carpenter coined the phrase "distributed ray tracing" to describe a technique for using each ray of a super-sampled ray tracing procedure as a sample in several dimensions to achieve effects such as penumbras and motion blur in addition to spatial anti-aliasing. The shade to be displayed at a pixel is a weighted integral of the image function. The purpose of using many rays per pixel is to estimate the value of this integral. In this work, a relationship between the number of sample rays and the quality of the estimate of this integral is derived. Furthermore, the number of rays required does not depend on the dimensionality of the space being sampled, but only on the variance of the multi-dimensional image function. The algorithm has been optimized through the use of statistical testing and stratified sampling.},
+journal = {SIGGRAPH Comput. Graph.},
+month = {jul},
+pages = {61–68},
+numpages = {8},
+keywords = {transparency, ray tracing, penumbras, translucency, shadows, anti-aliasing}
+}
+
+
