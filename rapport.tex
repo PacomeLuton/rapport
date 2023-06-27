@@ -138,7 +138,7 @@ the history of computer graphics.
     \tabularnewline
         $X_n$ & render of a scene with $n$ spp
     \tabularnewline
-        $\mathbb E(\cdot)$ & esperance
+        $\mathbb E(\cdot)$ & expectation
     \tabularnewline
         $\mathbb V(\cdot)$ & variance
     \tabularnewline
@@ -220,8 +220,8 @@ But as each numerical integration converge to a different rate, we may improve t
 (the sum of the error of each pixel) by using a different number of sample in for each pixel,
 but with still the same global budget $B$.
 \par Formally, for a budget $B$, we called a sampling map the gray scale image $n$, 
-where $n_p$ is the number of sample used to approximate $I^{(p)}$. The smapling 
-satisfy $\sum_{p} n_p = B$. Here is below chat look a typical sampling map:
+where $n_p$ is the number of sample used to approximate $I^{(p)}$. The sampling 
+satisfy $\sum_{p} n_p = B$. Here is what a typical sampling map looks like:
 
 \begin{figure}[H]
     \centering
@@ -243,8 +243,8 @@ sampling map $n$. Before explaining what is an optimal sampling, let introduce o
     number of sample that is used to numerically integrate the integrale $I^{(p)}$. In this paper,
     for $m$ integer, will note $\bar m$ the sampling map where $n_p = m$ for all $p$.
     \item $\R$ is the renderer. It take as input a scene $X$ and a sampling map $n$ and it produce
-    a possible final image $X_n$. One thing that is important, is that the final image $X_n$ is
-    probabalistic, the procecus od rendering is stochastic. In this paper, we really see $\R(X,n)$ 
+    a possible final image $X_n$. One thing that is important, is that the final image $X_n$ is a 
+    stochastic process. In this paper, we really see $\R(X,n)$ 
     as a random variable parameterized by the scene $X$ and the sampling map $n$.
     \item $\Sm$ is the function we're intrested in. We will called it the sampling function. 
     It take as input a scene $X$, and a rendered image $X_{\bar m}$ with a small number 
@@ -256,13 +256,13 @@ sampling map $n$. Before explaining what is an optimal sampling, let introduce o
     image $X_\infty$ and outputs the error. In this paper it's the Relative Mean Square Error (RMSE).
 \end{itemize}
 With those notation, we can formalize what is an optimal sampling map, for a given scene, 
-the optimal sampling $n_opt$ is:
+the optimal sampling $n_{opt}$ is:
 \begin{equation}
     \label{eq:0}
     n_{opt} = \argmin_{n_{opt}} \E \left [ \Los (\D (\R(X, n)), I_\infty) \right ]
 \end{equation}
-Note that is an esperance as the renderer is a random variable. We want to minimise the 
-esperance of the error.
+Note that is an expectation as the renderer is a random variable. We want to minimise the 
+expectation of the error.
 
 \par And we can also try to formalize what is an optimal sampling function $\Sm_{opt}$.
 Given an arbritrary set of scenes $\Omega$, possibly infinite, $\Sm_{opt}$ on this set of 
@@ -306,7 +306,7 @@ part of my intership.
 In 2018, \cite{kuznetsov2018deep} propose to approximate $S_{opt}$ by doing a stochastic
 gradient descent on the space of convolutional neural networks. In the same time they also 
 optimise the denoiser to work well with the sampler, but it's not what is really important. 
-Forammly, they are optimising an equation that is slightly different from \ref{eq:1}:
+Formmaly, they are optimising an equation that is slightly different from \ref{eq:1}:
 \begin{equation}
     \label{eq:2}
     \D_{opt}, \Sm_{opt} = \argmin_{D, \Sm} \int_{X\in\Omega} \E_r \left [ \Los (\D (\R(X, \Sm(X_n, B), r)), X_\infty) \right ]
@@ -732,7 +732,7 @@ are in red.
 \end{center}
 The green part shows where the next sample can be. And as our sampler is stratified,
 with the knowledge of where was our first sample, we know that the second sample can only
-be in a quarter of the domain. That's why the esperance of this realisation is not the
+be in a quarter of the domain. That's why the expectation of this realisation is not the
 the groundtruth, but only the true integrale of the corresponding quarter of the image.
 \par This is just a consequences of the correlation between sample in stratified sample.
 
@@ -868,6 +868,11 @@ and with $Los_g$ is loss on the gradient to ensure the sharpness of the edge exp
 
 \subsection{Experimental result}
 
+\paragraph*{Information} This section need still active work, 
+I still have a full month to do a proper analysis, but
+here is a less rigourus analysis of of result, as I have to send 
+the report now, but a better analysis will be done in the futur.
+
 In order to mesure if our sampler is working correctly, we can do two thing:
 \begin{itemize}
     \item See if our sampler with our finetune denoiser is better that the base denoiser 
@@ -879,10 +884,6 @@ In order to have a fair comparaison, I trained DARS with the exact same dataset 
 number of iteration.
 
 
-\paragraph*{WARNING} This section need still active work, 
-I still have a full month to do a proper analysis, but
-here is a less rigourus analysis of of result, as I have to send 
-the report now.
 
 \subsubsection{Comparaison to uniform sampling map {\color{red} TO DO}}
 
