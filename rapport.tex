@@ -704,7 +704,7 @@ a better regression algorithm. Or maybe try a different neural network architect
 \section{Adaptive sampling by direct optimisation}
 
 The goal of this section is to find a fake renderer that is designed to work
-with stratified sample. But before describing our fake renderer, let's look at
+with stratified samples. But before describing our fake renderer, let's first look at
 some properties of stratified sample when we use them in adaptative sampling.
 
 \subsection{Analysis on adaptive sampling with stratified samples}
@@ -758,6 +758,10 @@ isn't really possible with stratified samples as it is already difficult to make
 the distribution of next sample, it depends on the number of sample we already used. 
 And as we are using sample in high dimension, we don't want to compute the exact green 
 area where the next sample can be. Thus we can't know the true expectation of $\E_h[\R(X,h | s)]$.
+
+\paragraph*{Discussion} The combination of images from different number of samples per pixel 
+as done in \cite{kuznetsov2018deep} is not possible either. Thus, we needed to find a really 
+different fake renderer in order to work with stratified samples.
 
 \subsection{The derivation issue}
 
