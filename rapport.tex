@@ -98,9 +98,17 @@ This work is an invitation to the journey I followed during my internship.
 
 \par In 3D rendering, we want to render images. To do so, for each pixel 
 we simulate photon paths that go from a light, bounce on objects and finally 
-arrive on the camera sensor.
+arrive on the camera sensor. In pratice, we search path in thhe reverse direction, 
+from the camera sensor to the light path.
 
-{\color{red} TODO : Add a schema of photon path}
+\begin{figure}[H]
+    \centering
+    \caption{Example of photon path, image taken from the PBRT book \cite{10.5555/1854996}}
+    \begin{tabular}{c}
+    \includegraphics[width=80mm]{image/initialPhoton.png}
+    \end{tabular}
+\end{figure}
+
 
 \par This is equivalent to computing a multidimensional integral numerically. 
 In the general case this is a difficult problem. Often the best we can do is 
@@ -115,10 +123,22 @@ the approximation to the true integral.
 
 \par Simply put, we do a Monte Carlo numerical integration for each pixel 
 of the image. And each numerical integration converges more or less quickly. 
-For example, if a pixel only see to a light, we have a good approximation 
+For example, if a pixel only see a light, we have a good approximation 
 of the integral directly with a single photon path. But for a pixel that see a dark 
 region under a table, we have to simulate several photon paths to take into account
-all the global illumination and have a good approximation of the true integral.
+all the global illumination and have a good approximation of the true integral. An example
+of this situation can be found below:
+
+\begin{figure}[H]
+    \centering
+    \caption{Example of a rendered image and its corresponding RMSE error}
+    \begin{tabular}{cc}
+    \includegraphics[width=45mm]{image/initial_rendered.png}
+    & \includegraphics[width=45mm]{image/initial_error.png}
+    \end{tabular}
+\end{figure}
+We see that the error is high below the table, and the error is exactly zero for pixel on 
+the light.
 
 \par In practice, each photon path costs a certain amount of computing power. 
 And we want to render the image (find a good approximation of the integral 
@@ -469,7 +489,7 @@ where $gain(p)$ is the error gain by adding a sample in pixel $p$
  have the following property:
 \paragraph*{Small Lemma} \textit{If we have a sampling map $n$, 
 and two pixels $p$ and $p'$ such that 
-\[gain(p) + loss(p') > 0\] 
+\[gain(p) + loss(p') < 0\] 
 we can get a better sampling map by swapping a sample from $p'$ to $p$.}\\ 
 With this little lemma, we can derive an algorithm to minimise the 
 average error as long as we observe point $p$ and $p'$ with positive 
@@ -841,7 +861,7 @@ for the sampler.
 it is the same architecture ad in the previous section and in \cite{kuznetsov2018deep}. 
 The sampler outputs a single channel image representing the sampling map. And the denoiser
 outputs a $13\times13$ channel image that represents a kernel of denoising as it 
-is better than directly predicting the correct color in \cite{10.1145/3072959.3073708}. 
+is better than directly predicting the correct color in \cite{10.1145/3072959.3073708}.
 Here is an example of my denoiser:
 
 \begin{figure}[H]
@@ -935,11 +955,6 @@ In order to have a fair comparaison, I trained DARS with the exact same dataset 
 number of iteration.
 
 
-
-\subsubsection{Comparaison to uniform sampling map {\color{red} TO DO}}
-
-
-\subsubsection{Compariason to DARS {\color{red} TO DO}}
 
 
 \section{Conclusion {\color{red} TODO}}
