@@ -102,28 +102,31 @@ arrive in the sensor of the camera.
 
 {\color{red} TODO : Add a schema of photon path}
 
-\par This is equivalent to compute an multidimensionnal integrals numerically. 
-In the general case, this problem is difficult. Often the best we 
-can do is to calculate an approximation of this integral. For this 
-purpose, Monte Carlo integration is used. I will describe this method in
-the preliminaries \ref{montecarlo}, but intuitively, this method corresponds
-to simulate a certain number a photon path. And with more photon simulated, 
-we have a better approximation of the true integral.
+\par This is equivalent to computing a multidimensional integral numerically. 
+In the general case this is a difficult problem. Often the best we can do is 
+to compute an approximation of the integral. This is done by Monte Carlo 
+integration. I will describe this method in the preliminaries \ref{montecarlo}, 
+but intuitively this method corresponds to simulating a certain 
+number of photon paths. And the more photons simulated, the better 
+the approximation to the true integral.
 
-\par Simply, for each pixel of the image, we have to do a numerical
-integration with Monte Carlo method. And each numerical integration
-converge more or less faster. For example, if a pixel correspond to
-a light, with one photon we directly have a good approximation of the
-integral. But for a pixel that see a dark region below a table, we have
-to simulated multiple photon to take into account all the global illumination, 
-so we will need more photon to have a good approximation of the true integral.
+\par Simply put, we have to do a Monte Carlo numerical integration for each pixel 
+of the image. And each numerical integration converges more or less quickly. 
+For example, if a pixel corresponds to a light, we have a good approximation 
+of the integral directly with a single photon path. But for a pixel that represents a dark 
+region under a table, we have to simulate several photon paths to take into account
+all the global illumination and have a good approximation of the true integral.
 
-\par In pratice, each photon path cost a certains amount of computational power.
-And we want to render the image (find a good approximation of the integral for each pixel) 
-with the minimal number of computation. Thus, a simple idea to reduce the number of
-computation is to allocated a different number of computationnal power (number a photon path)
-to each pixel. This is called adaptative sampling. This idea was introduce very early in
-the history of computer graphics.
+\par In practice, each photon path costs a certain amount of computing power. 
+And we want to render the image (find a good approximation of the integral 
+for each pixel) with the minimum number of computations. So a simple idea 
+to reduce the number of computations is to allocate a different number 
+of computationnal power (number of photon paths) to each pixel. This is called 
+adaptive sampling. This idea was introduced very early in the 
+history of computer graphics \cite{10.1145/325165.325179}.
+
+\par The goal of this internship was to explore new ways of doing adaptive 
+sampling, with a small quantity of information.
 %-------------------------------------------------------------------------
 \section{Preliminaries}
 
