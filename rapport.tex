@@ -130,7 +130,13 @@ image with uniform noise (i.e. error) level, and overall,
 lower computational budget for the same overall quality 
 since paths are not wasted to refine pixels that are 
 already well converged. This idea was introduced very early in the 
-history of computer graphics \cite{10.1145/325165.325179}.
+history of computer graphics \cite{10.1145/325165.325179}. 
+
+\par Another technique for reducing errors is to pass the rendered image 
+through a denoiser, which usually removes high frequency noise. The 
+simplest example of a denoiser is a Gaussian filter. And now there 
+are some advanced denoisers that use deep learning, such as the one 
+in \cite{10.1145/3072959.3073708}.  
 
 \par The goal of this internship was to explore new ways of doing adaptive 
 sampling, with a small quantity of information.
@@ -147,8 +153,6 @@ sampling, with a small quantity of information.
         $\E, \V, Cov$ & Expectation, Variance and Covariance function
     \tabularnewline
         $X$ & scene
-    \tabularnewline
-        $X_n$ & render of a scene with $n$ spp
     \tabularnewline
         $\mathbb E(\cdot)$ & expectation
     \tabularnewline
@@ -230,7 +234,7 @@ total number of samples (nuber of photon paths) we will compute in the entire
 image. And since simulating any photon path (characterised by a sample) takes about the 
 same time, it is equivalent to limiting the time we have to render the image.
 
-\par Normally $B=n\times P$ and we use $n$ samples to approximate each integral 
+\par Normally $B=N\times P$ and we use $N$ samples to approximate each integral 
 $I^{(p)}$. However, as each numerical integration converges at a different 
 rate, we can improve the global error (the sum of the error of each pixel) 
 by using a different number of samples for each pixel, but still with the same 
@@ -260,18 +264,17 @@ our notation:
     in order to render the image.
     \item $n$ is a sampling map. It's a greyscale image where each pixel value $n_p$ is the 
     number of samples used to numerically integrate the integral $I^{(p)}$. 
-    In this paper, for $m$ integer, we will note $\bar m$ the sampling map 
-    where $n_p = m$ for all $p$.
+    In this paper, when the sampling map is a constant $m$, we denote it $\bar{m}$
     \item $\R$ is the renderer. It takes as input a scene $X$ and a sampling map 
     $n$ and produces a possible final image $X_n$. It is important to note that 
     the final image $X_n$ is a stochastic process. In this paper we really see 
     $\R(X,n)$ as a random variable parameterised by the scene $X$ and the sampling 
     map $n$.
     \item $\Sm$ is the function we're intrested in. We will call it the sampling function. 
-    It takes as input a scene $X$, and a rendered image $X_{\bar m}$ with a small number 
+    It takes as input a rendered image $X_{\bar m}$ with a small number 
     of samples ($m$ is relatively small compared to the global budget $B$), and it 
-    produces a sampling map $n$. We will note $\Sm_{uni}$ the sampling function 
-    which always returns $\bar m$.
+    produces a sampling map $n$. We will note $\Sm_{default}$ the sampling function 
+    which always returns a uniform sampling map $\bar m$.
     \item $\D$ is the denoiser function, that take as input a rendered image $X_n$ and try to
     denoise it in order to reduce the error.
     \item $\Los$ is the loss function, it take as input the rendered image $X_n$ and the groundtruth 
@@ -291,7 +294,7 @@ Given an arbritrary set of scenes $\Omega$, possibly infinite, $\Sm_{opt}$ on th
 scenes is:
 \begin{equation}
     \label{eq:1}
-    \Sm_{opt} = \argmin_{\Sm} \int_{I\in\Omega} \E \left [ \Los (\D (\R(X, \Sm(X_n, B))), I_\infty) \right ]
+    \Sm_{opt} = \argmin_{\Sm} \int_{I\in\Omega} \E \left [ \Los (\D (\R(X, \Sm(X_{\bar m}, B))), I_\infty) \right ]
 \end{equation}
 
 The goal of this intership was notably to find good sampling function, as close as 
@@ -364,18 +367,18 @@ I will now brevly explain what are their fake renderer and how they work.
 \par In DARS \cite{kuznetsov2018deep}, their fake renderer is $\R_{c}$ that renders 
 new image by combining image from different numebr of samples per pixel. Using the fact that 
 for uniformly independent sample, we have:
-\[ \R(X,n+m) = \frac{n\R(X,n) + m\R(X,m)}{n+m} \]
-Note that this is an equality on random variable. In other words, by taking two 
-images $X_n$ and $X_m$ rendered with $n$ and $m$ samples 
-respectively. We can combine them to produce an image $X_{n+m}$ that follows the same 
-distribution as the image produced using $n+m$ samples.
-So they  pre-render a set of images with power of two sample rates, $X_{2^0}$, $X_{2^1}$, \dots, $X_{2^k}$, 
+\[ \R(X,n+m) = \frac{n \times \R(X,n) + m \times \R(X,m)}{n+m} \]
+Here, the $+$, $\times$ and $/$ are pixels wize operation. Note that this is an equality 
+on random variable. In other words, by taking two images $X_n$ and $X_m$ rendered with 
+$n$ and $m$ sampling map, respectively. We can combine them to produce an image 
+$X_{n+m}$ that follows the same distribution as the image produced using the $n+m$ sampling map.
+So they pre-render a set of images with power of two sample rates, $X_{\bar 2^0}$, $X_{\bar 2^1}$, \dots, $X_{\bar 2^k}$, 
 where $2^k$ is a large number, they can produce an image of arbitrary sample count.
 \begin{equation}
     \label{eq:3}
-    \R_c(X,n) = \frac{\sum_{i=0}^k 2^i X_{2^i} g(n,i)}{n}
+    \R_c(X,n) = \frac{\sum_{i=0}^k 2^i X_{\bar 2^i} g(n,i)}{n}
 \end{equation}
-where $g(n,i)$ is the binary value of the i-th lowest bit of $n$.
+where $g(n,i)$ is a map where $g(n,i)_p$ is the binary value of the i-th lowest bit of $n_p$.
 
 \par And more recently, \cite{10.1145/3550454.3555515} used a different fake 
   renderer $R_{a}$ that renders new images by generating
@@ -386,8 +389,8 @@ where $g(n,i)$ is the binary value of the i-th lowest bit of $n$.
   gamma function according to the pixel distribution analysis done by 
   \cite{elek2019learning}.
 
-\par And to derive those fake renderer, in \cite{kuznetsov2018deep} and
-\cite{10.1145/3550454.3555515} they use a numerical derivation:
+\par And to differentiate these fake renderer, in \cite{kuznetsov2018deep} and
+\cite{10.1145/3550454.3555515} they use a numerical differentiation:
   \[ \frac{\partial \R(X,s)}{\partial s} = \frac{\R(X,s+h) - \R(X,s)}{h}\]
   But this simple numerical derivation is extremely noisy and thus makes the 
   training process unstable, so they suggest to average 
@@ -398,7 +401,7 @@ where $g(n,i)$ is the binary value of the i-th lowest bit of $n$.
       & = \frac{X_\infty - \R(X,s)}{s}
   \end{align}
 
-\paragraph*{Perspective} Both of those fake renderer use the fake that the sample are
+\paragraph*{Perspective} Both of those fake renderer use the fact that the sample are
 independant. Thus, they are not build to work with stratified sample. The question is
 can we make a fake renderer where the optimisation still work that can take into account
 that the real renderer use stratified sample. This is the problem on which I work 
@@ -423,7 +426,7 @@ and $a_p$, $b_p$ are two parameters that depend on the function we are
 integrating and the random sequence we are using. With our formalism 
 \ref{eq:1}, with a linear loss on each pixel (the loss is the sum of 
 the losses on each pixel), we have:
-\[ \Los(\R(X,n)_p) = \frac{b_p}{n_p^{a_p}} \]
+\[ \Los(\R(X,n)_p, X_\infty) = \frac{b_p}{n_p^{a_p}} \]
 with $n$ by $\Sm(X_m, B)$. Now we have a formulation that is no longer 
 dependent on the renderer.
 
@@ -445,7 +448,8 @@ Here is an example of what the map $a$ and $b$ look like on a scene:
 
 If we have the parameter $a$ and $b$ of the equation \ref{eq:99} for each pixel, 
 we can do different type of sampling function. Two examples are given in 
-the next subsection.
+the next subsection. Note that the estimation of $a$ and $b$ for a given scene
+is a complex problem that will be discussed in section \ref{ab}
 
 
 \subsubsection{Minimal error expectation}
@@ -504,7 +508,7 @@ The result of this algo is this sample map:
 \subsubsection{Equal error expectation}
 
 \paragraph*{Goal} We may want to do other things that just minimising the global error, 
-like having a sampling function $\Sm_{equal}$ 
+like having a sampling function $\Sm_{uni}$ 
 that produce an image where each pixel integration as the same expectation of error. 
 
 \par To do so, by reversing the equation, from an error level $e$, we can get the number 
@@ -543,7 +547,7 @@ an average budget of 64 samples per pixel:
 
 \begin{figure}[H]
     \centering
-    \caption{Sampling map and the corresponding error of $\Sm_{equal}$}
+    \caption{Sampling map and the corresponding error of $\Sm_{uni}$}
     \begin{tabular}{ccc}
     \includegraphics[width=45mm]{image/without/sm.png}
     & \includegraphics[width=45mm]{image/without/normal.png}
@@ -559,14 +563,14 @@ a huge computational power.
 \subsubsection{Theoretical Error comparaison}
 
 Because it's fun, we can make a side by side comparison of the error map for a scene of 
-two sampling function $\Sm_{min}(X), \Sm_{equal}(X)$ with the error map
-of the default sampling function $\Sm_{uni}(X)$ that always output $\bar m$.
+two sampling function $\Sm_{min}(X), \Sm_{uni}(X)$ with the error map
+of the default sampling function $\Sm_{default}(X)$ that always output $\bar m$.
 
 \begin{figure}[H]
     \centering
     \caption{Comparaison of the error, after using different sampling function}
     \begin{tabular}{ccc}
-    $\Sm_{min}(X)$ & $\Sm_{uni}(X)$ & $\Sm_{equal}(X)$ \\
+    $\Sm_{min}(X)$ & $\Sm_{default}(X)$ & $\Sm_{uni}(X)$ \\
     \includegraphics[width=45mm]{image/without/RMSE_min.png}
     & \includegraphics[width=45mm]{image/without/RMSE_uni.png}
     & \includegraphics[width=45mm]{image/without/RMSE_mean.png} \\
@@ -574,18 +578,18 @@ of the default sampling function $\Sm_{uni}(X)$ that always output $\bar m$.
     \end{tabular}
 \end{figure}
 As you can see, the error with $\Sm_{min}$ isn't much smaller than 
-the error in the default sampling function $\Sm_{uni}$.
- And to get a uniform error, we lose a global quality. 
+the error in the default sampling function $\Sm_{default}$.
+ And to get a uniform error with $\Sm_{uni}$, we lose in the global error. 
 \par This gives us a general insight: \textit{uniform error
  and minimising mean error require two sampling maps that 
  are really different}. In other words, to minimise the 
  average error, you don't want to have the same error in 
  every pixel.
 
-\subsection{Prediction of the parameter $a$ and $b$}
+\subsection{Prediction of the parameter $a$ and $b$} \label{ab}
 
-After reading the previous section, you may wonder how we get 
-  the parameter $a$ and $b$. The plan is simple. Can we predict 
+As saif before, the estimation of $a$ and $b$ is a difficult problem.
+  Our plan to estimate them is simple. Can we predict 
   these parameters with a minimum number of information that is 
   fast to compute. 
   In pratice, what we did is the following:
@@ -593,11 +597,12 @@ After reading the previous section, you may wonder how we get
   spp, is it possible to find a good enough approximation 
   of $a$ and $b$ thanks to a neural network?
 
-\par The plan is simple, from a dataset taht contains for many scene $X$ pairs: 
+\par From a dataset that contains for many scene $X$ pairs: 
 (input=$X_{\bar m}$,output=$(a,b)$) with a small $m$, train a 
-convolutional neural network that from $X_{\bar m}$ output $a$ and $b$.
+convolutional neural network that from $X_{\bar m}$ with many features,
+outputs $a$ and $b$.
 
-\paragraph*{Discussion} The idea is simple, but there 
+\paragraph*{Discussion} In this idea there 
 is a big problem, it is probably not true that we can find a 
 strong enough link between image with low sample ($X_{\bar m}$) 
 to their respective convergence rate ($a$ and $b$). We clearly have a 
@@ -611,7 +616,7 @@ to find a link between neighbours pixel.
 
 \par The first difficulty was creating a dataset to train the network on. 
 
-Our model is really simple, as input to our network we have 
+As input to our network we have 
 the image with low sample count $X_{\bar m}$, and as output we have the 
 two parameter maps $a$ and $b$. So all we had to do was find 
 the truth parameters $a$ and $b$ for each scene.
@@ -686,10 +691,10 @@ And here what append when I use these prediction of $a$ and $b$ with the samplin
 function $\Sm_{min}$.
 \begin{figure}[H]
     \centering
-    \caption{Comparaison of $\Sm_{min}$ using the prediction of $a$ and $b$, with $\Sm_{uni}$}
+    \caption{Comparaison of $\Sm_{min}$ using the prediction of $a$ and $b$, with $\Sm_{default}$}
     \begin{tabular}{|c|c|c|c|}
         \hline
-        Scene & $\Sm_{min}$ & $\Sm_{min}$ error & $\Sm_{uni}$ error\\
+        Scene & $\Sm_{min}$ & $\Sm_{min}$ error & $\Sm_{default}$ error\\
         \hline
         \includegraphics[width=35mm]{image/without/pimage.png}
         & \includegraphics[width=35mm]{image/without/psm.png}
@@ -706,7 +711,7 @@ function $\Sm_{min}$.
     \end{tabular}
 \end{figure}
 In the first scene we have a improvement in the error, but in the second scene, we do 
-even worst than with the default sampling function $\Sm_{uni}$. To summarize, our
+even worst than with the default sampling function $\Sm_{default}$. To summarize, our
 prediction of $a$ and $b$ combined with out $\Sm_{min}$ doesn't always reduce 
 the error.
 
@@ -804,7 +809,7 @@ shouldn't really apply this technique to compute gradient.
 a way to get a better final result, than with the approximation that 
 $\E_h \left [\R(X,h | s) \right ] = X_\infty$. And this could be explained by the fact that 
 even if this approximation is not true, the direction of the gradient is still good 
-enough, and so the network converges in the good direction.
+enough, and so the network converges in a direction that reduces the error.
 
 \subsection{Interpolation}
 
@@ -845,7 +850,7 @@ Here is an example of my denoiser:
     & \includegraphics[width=35mm]{image/denoiser/kernelmap.png}
     & \includegraphics[width=35mm]{image/denoiser/denoisy.png}
     & \includegraphics[width=35mm]{image/denoiser/gt.png} \\
-    noisy (2 spp) & kernelmap & denoisy & groundtruth \\
+    noisy (2 spp) & kernelmap & denoised & groundtruth \\
     \end{tabular}
 \end{figure}
 A bigger image of this figure can be found in the annexe \ref{denoiserImage}:
@@ -972,7 +977,7 @@ using $A$ and $A\cup B$. Here the formula in the spacial case where $|A| = |B|$:
     noisy (2 spp) & kernelmap \\
     \includegraphics[width=80mm]{image/denoiser/denoisy.png}
     & \includegraphics[width=80mm]{image/denoiser/gt.png} \\
-    denoisy & groundtruth \\
+    denoised & groundtruth \\
     \end{tabular}
 \end{figure}
 
