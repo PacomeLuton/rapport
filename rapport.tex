@@ -670,7 +670,7 @@ With more hindsight, we should have generate smaller image, maybe 64x64, but wit
 
 \subsubsection{Implementation details}
 
-\paragraph*{Network} We used the same architecture of UNET as in \cite{kuznetsov2018deep}. For more clarity, 
+\paragraph*{Network} We used the same UNET architecture as in \cite{kuznetsov2018deep}. For more clarity, 
 here is below the schema of the network. The schema has be taken from the article 
 \cite{kuznetsov2018deep}.
 \begin{figure}[H]
@@ -684,9 +684,9 @@ In our case, $n=2$ as we predict 2 channels for $a$ and $b$. The input of the ne
 is:
 \begin{itemize}
     \item The images $X_{\bar 1}$, $X_{\bar 2}$ and $X_{\bar 4}$, to give the network the starting point 
-    of the progression of convergence.
-    \item Some auxiliarys buffers, like the normal map, the depth map and the albedo map, to help the 
-    network to link neighbours that should be similare.
+    of the convergence progression.
+    \item Some auxiliary buffers, including the normal map, the depth map and the albedo map, to help 
+    the network connect neighbours that should be similar.
 \end{itemize}
 
 We trained it with the Adam optimiser \cite{kingma2017adam} 
