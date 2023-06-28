@@ -196,7 +196,7 @@ linked to the variance as
     \E[(I(f) - I_N)^2] = \E[(E(I_N) - I_N)^2] = \V(I_N)
 \end{align*}
 
-\subsubsection{Stratified sampling}
+\subsubsection{Correlated samples}
 
 One technique to reduce the error, is to do a variant of Monte Carlo integration, 
 called Quasi-Monte Carlo. Instead of taking $N$ \textbf{independent} random samples 
@@ -213,16 +213,16 @@ thus the error of our estimate.
 \par One of the known ways to generate a good correlation is to use is to 
 use so called low-discrepancy sequences, 
 such as a Sobol sequence, Halton sequence or Hammersley sequence. The 
-idea of stratified sampling is to spread the sample all across space.
+idea in most of correlated sequence is to spread well the sample all across space.
 
-For simple integrals, the stratified sampler gives provably lower error and 
+For simple integrals, the low-discrepancy sequences gives provably lower error and 
 faster asymptotic convergence \cite{10.1145/237170.237265}. And empirically, 
-stratified samplers also give a better rate of convergence for the complex 
+low-discrepancy sequences also give a better rate of convergence for the complex 
 integrals that occur in rendering \cite{renderman}.
 
 \paragraph*{Summary} What is important to remember to understand this work 
 is that in order to reduce the error, most modern renderers use a 
-stratified sequence like Sobol \cite{renderman} to generate random points.
+low-discrepancy sequences like Sobol \cite{renderman} to generate random points.
 And these random points are correlated.
 
 \subsection{Adaptative Sampling}
@@ -323,7 +323,7 @@ covariance term into account.
 And as we have seen previously, most of the modern renderer use correlated sample. 
 
 \paragraph*{Perspective} Thus it will be great if we had a method close to this one that take into account
-the fact that we use stratified sample. This is the problem on which I work on during the first
+the fact that we use correlated sample. This is the problem on which I work on during the first
 part of my intership.
 
 \subsubsection{With optimisation}
@@ -402,9 +402,9 @@ where $g(n,i)$ is a map where $g(n,i)_p$ is the binary value of the i-th lowest 
   \end{align}
 
 \paragraph*{Perspective} Both of those fake renderer use the fact that the sample are
-independant. Thus, they are not build to work with stratified sample. The question is
+independant. Thus, they are not build to work with correlated sample. The question is
 can we make a fake renderer where the optimisation still work that can take into account
-that the real renderer use stratified sample. This is the problem on which I work 
+that the real renderer use correlated sample. This is the problem on which I work 
 on during the second part of my intership.
 
 \section{Adaptive sampling using a prior knowledge on the repartition of the error}
@@ -431,7 +431,7 @@ with $n$ by $\Sm(X_m, B)$. Now we have a formulation that is no longer
 dependent on the renderer.
 
 \paragraph*{Remark} With a random independent samples, we know that $b_p = Var(f)$ and 
-$a_p=1$. But we are interested in the case where we use stratified samples.
+$a_p=1$. But we are interested in the case where we use correlated samples.
 
 Here is an example of what the map $a$ and $b$ look like on a scene:
 \begin{figure}[H]
@@ -731,10 +731,10 @@ a better regression algorithm. Or maybe try a different neural network architect
 \section{Adaptive sampling by direct optimisation}
 
 The goal of this section is to find a fake renderer that is designed to work
-with stratified samples. But before describing our fake renderer, let's first look at
-some properties of stratified sample when we use them in adaptative sampling.
+with correlated samples. But before describing our fake renderer, let's first look at
+some properties of correlated samples when we use them in adaptative sampling.
 
-\subsection{Analysis on adaptive sampling with stratified samples}
+\subsection{Analysis on adaptive sampling with correlated samples}
 
 We will note $\R(X, h | s)$ the rendering image of the scene X, using $h$ sample of
 a sequence that has already used $s$ sample.
@@ -743,7 +743,7 @@ a sequence that has already used $s$ sample.
 \[ \E_h[\R(X,h | s)] = X_\infty \]
 In other words, when we add new samples, the expectation of the image 
 with these new samples is the ground truth. This simple property no 
-longer holds when we have a stratified sample.
+longer holds when we have a correlated sample.
 \par Let's look at an example in two dimensions with a fully stratified 
 sequence, like the one in \cite{10.2312:sr.20211287}. Suppose we already 
 have a know where where our first samples are in blue, the news samples 
@@ -778,21 +778,22 @@ The green part shows where the next sample can be. And as our sampler is stratif
 with the knowledge of where was our first sample, we know that the second sample can only
 be in a quarter of the domain. That's why the expectation of this realisation is not the
 the groundtruth, but only the true integrale of the corresponding quarter of the image.
-\par This is just a consequences of the correlation between sample in stratified sample.
+\par Formally it is just that $\E(x_j | x_{j-1},\dots,x_1) != \E(x_j)$. Thus, In
+most of the case $\E[f(x_j)] \neq I(f)$. This is just the defition of correlation.
 
 \par With this in mind, we can see that the analysis done by \cite{10.1145/3550454.3555515}
-isn't really possible with stratified samples as it is already difficult to make an order 1 approximation of 
-the distribution of next sample, it depends on the number of sample we already used. 
-And as we are using sample in high dimension, we don't want to compute integral on each of 
-those subdomain where the next sample can be. Thus we can't know the true expectation of $\E_h[\R(X,h | s)]$.
+isn't really possible with correlated samples as in order to make the second order approximation
+of the distribution of the next sample, we need to compute integral on each of 
+those subdomain where the next sample can be, for every sample of the correlated sequence. This
+is computationally to expensive.
 
 \paragraph*{Discussion} The combination of images from different number of samples per pixel 
 as done in \cite{kuznetsov2018deep} is not possible either. Thus, we needed to find a really 
-different fake renderer in order to work with stratified samples.
+different fake renderer in order to work with correlated samples.
 
 \subsection{The derivation issue}
 
-With stratified samples, we have another issue.
+With correlated samples, we have another issue.
 Let's take a closer look at the derivation of the equation \ref{eq:4}:
 \begin{align*}
     \label{eq:4}
@@ -814,7 +815,7 @@ enough, and so the network converges in a direction that reduces the error.
 \subsection{Interpolation}
 
 I can now introduce the fake renderer that we used, the only ways we found that can
-take into account the fact that we used stratified sequence and not independent sample
+take into account the fact that we used correlated sequence and not independent sample
 is to generate images $X_{2^0}$, $X_{2^1}$, \dots, $X_{2^k}$, where $2^k$ is a large number
 with the same sequence but with different sample count. And then interpolate for 
 $n = 2^i + j$ ($j < 2^i$):
@@ -827,8 +828,8 @@ $2^i$. The way to compute this from $X_{2^i}$ and $X_{2^{i+1}}$ is described in 
 
 \paragraph*{Discussion} This interpolation has many flaws, but it seems to be 
  the best way to approximation of the true renderer, that take into 
- account the fact that our samples are stratified. We have 
- $\E[R_i(X,n)] \approx \E[R(X,n)]$ and $\V[R_i(X,n)] \approx \V[R(X,n)]$.
+ account the fact that our samples are correlated. For most of the correlated sequence used, 
+ we have $\E[R_i(X,n)] \approx \E[R(X,n)]$ and $\V[R_i(X,n)] \approx \V[R(X,n)]$.
 
 \subsection{Implementation Details}
 
@@ -927,7 +928,7 @@ In order to mesure if our sampler is working correctly, we can do two thing:
 \begin{itemize}
     \item See if our sampler with our finetune denoiser is better that the base denoiser 
     that denoise a uniformly sample image.
-    \item Compare our method that is specially adapted to stratified sampler, with DARS using stratified
+    \item Compare our method that is specially adapted to correlated sampler, with DARS using correlated
     sampler. 
 \end{itemize}
 In order to have a fair comparaison, I trained DARS with the exact same dataset and with the same 
