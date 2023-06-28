@@ -96,24 +96,27 @@
 
 This work is an invitation to the journey I followed during my internship. 
 
-\par In 3D rendering, we want to render images. To so, for each pixel 
-we simulate photon paths that goes from a light, bounce on object and finally 
-arrive in the sensor of the camera.
+\par In 3D rendering, we want to render images. To do so, for each pixel 
+we simulate photon paths that go from a light, bounce on objects and finally 
+arrive on the camera sensor.
 
 {\color{red} TODO : Add a schema of photon path}
 
 \par This is equivalent to computing a multidimensional integral numerically. 
 In the general case this is a difficult problem. Often the best we can do is 
-to compute an approximation of the integral. This is done by Monte Carlo 
-integration. I will describe this method in the preliminaries \ref{montecarlo}, 
+to compute an approximation of the integral. For this purpose, Monte Carlo integration 
+is used. Their exist other method to do numerical integration like the quadrature or 
+the Newton-Cotes formula, but for multidimensional integral, Monte Carlo is the
+most robust method.
+I will describe this method in the preliminaries \ref{montecarlo}, 
 but intuitively this method corresponds to simulating a certain 
 number of photon paths. And the more photons simulated, the better 
 the approximation to the true integral.
 
-\par Simply put, we have to do a Monte Carlo numerical integration for each pixel 
+\par Simply put, we do a Monte Carlo numerical integration for each pixel 
 of the image. And each numerical integration converges more or less quickly. 
-For example, if a pixel corresponds to a light, we have a good approximation 
-of the integral directly with a single photon path. But for a pixel that represents a dark 
+For example, if a pixel only see to a light, we have a good approximation 
+of the integral directly with a single photon path. But for a pixel see a dark 
 region under a table, we have to simulate several photon paths to take into account
 all the global illumination and have a good approximation of the true integral.
 
@@ -122,7 +125,11 @@ And we want to render the image (find a good approximation of the integral
 for each pixel) with the minimum number of computations. So a simple idea 
 to reduce the number of computations is to allocate a different number 
 of computationnal power (number of photon paths) to each pixel. This is called 
-adaptive sampling. This idea was introduced very early in the 
+adaptive sampling. The expected result of adaptive sampling is an 
+image with uniform noise (i.e. error) level, and overall, 
+lower computational budget for the same overall quality 
+since paths are not wasted to refine pixels that are 
+already well converged. This idea was introduced very early in the 
 history of computer graphics \cite{10.1145/325165.325179}.
 
 \par The goal of this internship was to explore new ways of doing adaptive 
@@ -137,6 +144,8 @@ sampling, with a small quantity of information.
         Symbol & Description
     \tabularnewline 
     \hline
+        $\E, \V, Cov$ & Expectation, Variance and Covariance function
+    \tabularnewline
         $X$ & scene
     \tabularnewline
         $X_n$ & render of a scene with $n$ spp
@@ -169,35 +178,36 @@ random points $\{x_j\}_{j=1}^N$ uniformly distributed over the
 space $\mathbb A$. Formally:
 \begin{equation}
     \label{eq:montecarlo}
-    I_N = \int_{\mathbb A} S(x)f(x)dx, 
-        \: \text{ with } \:
-    S(x) = \frac{1}{N} \sum_{j=1}^N \delta(\lVert x-x_j \rVert)
+    I_N = \sum_{j=1}^N f(x_j)
 \end{equation}
 We know that the mean and the variance of our estimation are:
 \begin{equation}
-    \E(I_n) = I(f) \quad \text{and} \quad \V(I_N) = \frac{Var(f)}{N}
+    \E(I_n) = I(f) \quad \text{and} \quad 
+    \V(I_N) = \sum_{j=1}^N \frac{\V(f(x_j))}{N^2} = \sum_{j=1}^N\frac{\E[(I(f) - f(x_j))^2]}{N^2} = \frac{Var(f)}{N}
 \end{equation}
-where $I(f)$ is the true integral of $f$, and $Var(f)$ is the variation of $f$. 
+where $I(f)$ is the true integral of $f$, and $Var(f)=\E[(I(f) - f(x_j))^2]$ is the variation of $f$. 
 The variance is really important as the error in the integration is directly 
 linked to the variance as
 \begin{align*}   \label{eq:variance}
-    \E((I(f) - I_N)^2) = \E((E(I_N) - I_N)^2) = \V(I_N)
+    \E[(I(f) - I_N)^2] = \E[(E(I_N) - I_N)^2] = \V(I_N)
 \end{align*}
 
 \subsubsection{Stratified sampling}
 
 One technique to reduce the error, is to do a variant of Monte Carlo integration, 
-called Quasi-Monte Carlo. Instead of taking $N$ \textbf{independent} random points $\{x_j\}_{j=1}^N$ 
+called Quasi-Monte Carlo. Instead of taking $N$ \textbf{independent} random samples 
+$\{x_j\}_{j=1}^N$ 
 uniformly distributed over the space $\mathbb A$, we take $N$ \textbf{correlated} random 
 points $\{x_j\}_{j=1}^N$ uniformly distributed over the space $\mathbb A$. Formally, 
 the variance of the estimator is now:
  
-\[ \V(I_N) = \V\left [\frac{1}{N}\sum_{j=1}^N f(x_j) \right ] = \frac{Var(f)}{N} + \frac{2}{N}\sum_{i\neq j} CoVar(f(x_i),f(x_j)) \]
-
-By choosing a good correlation, we hope to reduce the variance of our estimator and 
+\[ \V(I_N) = \V\left [\frac{1}{N}\sum_{j=1}^N f(x_j) \right ] = \frac{Var(f)}{N} + \frac{2}{N^2}\sum_{i\neq j} Cov(f(x_i),f(x_j)) \]
+where $Cov$ is the covariance.
+By correlating sample points wisely, we hope to reduce the variance of our estimator and 
 thus the error of our estimate. 
 
-\par One of the known ways to generate a good correlation is to use a stratified sample, 
+\par One of the known ways to generate a good correlation is to use is to 
+use so called low-discrepancy sequences, 
 such as a Sobol sequence, Halton sequence or Hammersley sequence. The 
 idea of stratified sampling is to spread the sample all across space.
 
@@ -206,25 +216,30 @@ faster asymptotic convergence \cite{10.1145/237170.237265}. And empirically,
 stratified samplers also give a better rate of convergence for the complex 
 integrals that occur in rendering \cite{renderman}.
 
-\paragraph*{Summary} What is important to remember to understand this work is that 
-in order to reduce the error, most of the modern renderer use a stratified sequence like 
-Sobol \cite{renderman} to produce random points. And those random points are correlated.
+\paragraph*{Summary} What is important to remember to understand this work 
+is that in order to reduce the error, most modern renderers use a 
+stratified sequence like Sobol \cite{renderman} to generate random points.
+And these random points are correlated.
 
 \subsection{Adaptative Sampling}
 
-\par Let $P$ be the number of pixels in the image and, $I^{(p)}$ the integral of the pixel $p$. 
-When producing an image, we have $P$ integral to compute, one for each pixel, and we have a
-global budget $B$ that correspond the total number sample we will compute in the entire 
-image. And as simulating a photon path (caracterized by the sample) take about the 
-same time, it is equivalent to limit the time we have to render the image.
+\par Let $P$ be the number of pixels in the image and $I^{(p)}$ the integral of 
+the pixel $p$. When generating an image, we have $P$ integrals to compute, 
+one for each pixel. And we have a global budget $B$ corresponding to the 
+total number of samples (nuber of photon paths) we will compute in the entire 
+image. And since simulating any photon path (characterised by a sample) takes about the 
+same time, it is equivalent to limiting the time we have to render the image.
 
-\par Usually, $B=n\times P$ and we use $n$ sample to approximate each integral $I^{(p)}$.
-But as each numerical integration converge to a different rate, we may improve the global error
-(the sum of the error of each pixel) by using a different number of sample in for each pixel,
-but with still the same global budget $B$.
-\par Formally, for a budget $B$, we called a sampling map the gray scale image $n$, 
-where $n_p$ is the number of sample used to approximate $I^{(p)}$. The sampling 
-satisfy $\sum_{p} n_p = B$. Here is what a typical sampling map looks like:
+\par Normally $B=n\times P$ and we use $n$ samples to approximate each integral 
+$I^{(p)}$. However, as each numerical integration converges at a different 
+rate, we can improve the global error (the sum of the error of each pixel) 
+by using a different number of samples for each pixel, but still with the same 
+global budget $B$.
+
+\par Formally, for a budget $B$, we called a sampling map the grey-scale 
+image $n$, where $n_p$ is the number of samples used to approximate 
+$I^{(p)}$. The sampling map satisfies $\sum_{p} n_p = B$. Here is what a 
+typical sampling map looks like:
 
 \begin{figure}[H]
     \centering
@@ -237,22 +252,26 @@ satisfy $\sum_{p} n_p = B$. Here is what a typical sampling map looks like:
 \end{figure}
 
 
-\par The one million dollar question is then, for a scene $X$, how to find the optimal
-sampling map $n$. Before explaining what is an optimal sampling, let introduce our notation:
+\par The intresting question is then, for a scene $X$, how to find the optimal
+sampling map $n$. Before explaining what is an optimal sampling map is, let's introduce 
+our notation:
 \begin{itemize}
     \item $B$ is the global budget, corresponding to the total number photon path simulated
     in order to render the image.
-    \item $n$ is a sampling map. It's a gray scale image, where each pixel value $n_p$, is the
-    number of sample that is used to numerically integrate the integrale $I^{(p)}$. In this paper,
-    for $m$ integer, will note $\bar m$ the sampling map where $n_p = m$ for all $p$.
-    \item $\R$ is the renderer. It take as input a scene $X$ and a sampling map $n$ and it produce
-    a possible final image $X_n$. One thing that is important, is that the final image $X_n$ is a 
-    stochastic process. In this paper, we really see $\R(X,n)$ 
-    as a random variable parameterized by the scene $X$ and the sampling map $n$.
-    \item $\Sm$ is the function we're intrested in. We will called it the sampling function. 
-    It take as input a scene $X$, and a rendered image $X_{\bar m}$ with a small number 
-    of sample ($m$ is relatively small compare to global budget $B$), and it produce a sampling map $n$.
-    We will note $\Sm_{uni}$ the sampling function that always outputs $\bar m$.
+    \item $n$ is a sampling map. It's a greyscale image where each pixel value $n_p$ is the 
+    number of samples used to numerically integrate the integral $I^{(p)}$. 
+    In this paper, for $m$ integer, we will note $\bar m$ the sampling map 
+    where $n_p = m$ for all $p$.
+    \item $\R$ is the renderer. It takes as input a scene $X$ and a sampling map 
+    $n$ and produces a possible final image $X_n$. It is important to note that 
+    the final image $X_n$ is a stochastic process. In this paper we really see 
+    $\R(X,n)$ as a random variable parameterised by the scene $X$ and the sampling 
+    map $n$.
+    \item $\Sm$ is the function we're intrested in. We will call it the sampling function. 
+    It takes as input a scene $X$, and a rendered image $X_{\bar m}$ with a small number 
+    of samples ($m$ is relatively small compared to the global budget $B$), and it 
+    produces a sampling map $n$. We will note $\Sm_{uni}$ the sampling function 
+    which always returns $\bar m$.
     \item $\D$ is the denoiser function, that take as input a rendered image $X_n$ and try to
     denoise it in order to reduce the error.
     \item $\Los$ is the loss function, it take as input the rendered image $X_n$ and the groundtruth 
@@ -262,7 +281,7 @@ With those notation, we can formalize what is an optimal sampling map, for a giv
 the optimal sampling $n_{opt}$ is:
 \begin{equation}
     \label{eq:0}
-    n_{opt} = \argmin_{n_{opt}} \E \left [ \Los (\D (\R(X, n)), I_\infty) \right ]
+    n_{opt} = \argmin_{n} \E \left [ \Los (\D (\R(X, n)), X_\infty) \right ]
 \end{equation}
 Note that is an expectation as the renderer is a random variable. We want to minimise the 
 expectation of the error.
@@ -296,9 +315,9 @@ is directly proportionnal to the variance of the function \label{eq:variance},
 we can used this fact to try to have a good sampling map \cite{10.1145/325165.325179}.
 
 \par But this method, that work in Monte Carlo integration, is not designed for
-Quasi-Monte Carlo integration that use stratified sample. It doesn't take the 
+Quasi-Monte Carlo integration that use correlated sample. It doesn't take the 
 covariance term into account. 
-And as we have seen previously, most of the modern renderer use stratified sample. 
+And as we have seen previously, most of the modern renderer use correlated sample. 
 
 \paragraph*{Perspective} Thus it will be great if we had a method close to this one that take into account
 the fact that we use stratified sample. This is the problem on which I work on during the first
