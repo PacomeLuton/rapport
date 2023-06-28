@@ -576,15 +576,15 @@ an average budget of 64 samples per pixel:
     \end{tabular}
 \end{figure}
 
-It is still not perfect. The problem we had, as discussed later, is that it 
-is really hard to estimate these parameters $a$ and $b$ accurately. It need 
-a huge computational power.
+It's not perfect. The problem we had, as we will discuss later, is that it 
+is really hard to estimate these parameters $a$ and $b$ accurately. It takes 
+a lot of computing power.
 
 \subsubsection{Theoretical Error comparaison}
 
-Because it's fun, we can make a side by side comparison of the error map for a scene of 
-two sampling function $\Sm_{min}(X), \Sm_{uni}(X)$ with the error map
-of the default sampling function $\Sm_{default}(X)$ that always output $\bar m$.
+Because it's fun, we can make a side-by-side comparison of the error map for a scene of 
+two sampling functions $\Sm_{min}(X), \Sm_{uni}(X)$ with the error map
+of the default sampling function $\Sm_{default}(X)$ which always outputs $\bar m$.
 
 \begin{figure}[H]
     \centering
@@ -598,57 +598,50 @@ of the default sampling function $\Sm_{default}(X)$ that always output $\bar m$.
     \end{tabular}
 \end{figure}
 As you can see, the error with $\Sm_{min}$ isn't much smaller than 
-the error in the default sampling function $\Sm_{default}$.
+the error with the default sampling function $\Sm_{default}$.
  And to get a uniform error with $\Sm_{uni}$, we lose in the global error. 
 \par This gives us a general insight: \textit{uniform error
- and minimising mean error require two sampling maps that 
+ and minimising the mean error require two sampling maps that 
  are really different}. In other words, to minimise the 
- average error, you don't want to have the same error in 
+ mean error, you don't want to have the same error in 
  every pixel.
 
 \subsection{Prediction of the parameter $a$ and $b$} \label{ab}
 
-As saif before, the estimation of $a$ and $b$ is a difficult problem.
-  Our plan to estimate them is simple. Can we predict 
-  these parameters with a minimum number of information that is 
-  fast to compute. 
-  In pratice, what we did is the following:
-  Given the rendering image with $1$, $2$, $4$ 
-  spp, is it possible to find a good enough approximation 
-  of $a$ and $b$ thanks to a neural network?
+As said before, the estimation of $a$ and $b$ is a difficult problem.
+ Can we predict these parameters with a minimum of information that is fast 
+ to compute? 
 
-\par From a dataset that contains for many scene $X$ pairs: 
-(input=$X_{\bar m}$,output=$(a,b)$) with a small $m$, train a 
-convolutional neural network that from $X_{\bar m}$ with many features,
-outputs $a$ and $b$.
+\par From a dataset containing many scene $X$ pairs 
+(input=$X_{\bar m}$,output=$(a,b)$) with a small $m$, train a convolutional 
+neural network that outputs $a$ and $b$ from $X_{\bar m}$ with auxiliary buffers.
 
-\paragraph*{Discussion} In this idea there 
-is a big problem, it is probably not true that we can find a 
-strong enough link between image with low sample ($X_{\bar m}$) 
-to their respective convergence rate ($a$ and $b$). We clearly have a 
-huge lack of information. Our hope is that, as in rendering, neighbours 
-pixel integrale are similare, the network has more information 
-that just the $m$ samples of the pixel to predict $a$ and $b$. This 
-is the reason why we use a CNN for the network, to maximise the chance
-to find a link between neighbours pixel.
+\paragraph*{Discussion} There is a big problem with this idea, it is probably 
+not true that we can find a strong enough link between low sample ($X_{\bar m}$) 
+images and their respective convergence rates ($a$ and $b$). We clearly have 
+a huge lack of information. Our hope is that, as in rendering, neighbours 
+pixel integrale are similar, the network has more information than just 
+the $m$ samples of the pixel to predict $a$ and $b$. This is the reason 
+why we use a CNN for the network, to maximise the chance of finding a 
+connection between neighbouring pixels.
 
 \subsubsection{Create a dataset}
 
-\par The first difficulty was creating a dataset to train the network on. 
+\par The first difficulty was to create a dataset on which to train the network.
 
-As input to our network we have 
-the image with low sample count $X_{\bar m}$, and as output we have the 
-two parameter maps $a$ and $b$. So all we had to do was find 
-the truth parameters $a$ and $b$ for each scene.
+As input to our network we have the low sample count image $X_{\bar m}$ with auxiliary 
+buffers, which I will explain later, and as output we have the two parameter 
+maps $a$ and $b$. So all we had to do was find the truth parameters $a$ 
+and $b$ for each scene.
 
 \par To do this, for each scene, for each power of two 
 ($2^p$) up to 2048, I had generated $20$ images with $2^p$ 
 samples per pixel. Then I averaged the error at each sample count. 
-And finally, I did a linear regression in log space to find the 
-parameter, as we can rewrite the equation
+Finally, I did a linear regression in log space to find the 
+parameter, since we can rewrite the equation
 \ref{eq:99}:
 \[ \log(e_p) = -a_p\times \log(n_p) + \log(b_p)\]
-Below is the result of the regression for a typical pixel of an image
+Here is the result of the regression for a typical pixel of an image
 \begin{figure}[H]
     \centering
     \caption{Linear regression of the error in function of the number of sample}
@@ -656,17 +649,14 @@ Below is the result of the regression for a typical pixel of an image
 \end{figure}
 As you can see, the regression points are quite noisy. So our 
 ground truth isn't noise free. But we didn't have the 
-computational resources to compute more images to get a 
+computing resources to compute more images to get a 
 noise-free ground truth, as you can see in the figure \ref{fig:a}.
-\par I said that it's noisy because we have to remember that this graphic is in log scale.
-So even a small $\epsilon$ error in $a$, can result in a exponential error when predicting 
-the error of integration. 
 
 \par In the end, we generated the ground truth from 200 scenes of size 512x512.
-I have generate for 150 Go of render, it took more than a week on a 32 CPU core. 
-And the final size of the dataset is less than a 1Go, it only contains $a$ and $b$ for each scene. 
-With more hindsight, we should have generate smaller image, maybe 64x64, but with higher quality
-(more realisation per sample count).
+I generated for 150 Go of rendering, it took more than a week on a 32 CPU core. 
+And the final size of the dataset is less than 1Go, it only contains $a$ and $b$
+ for each scene.  In retrospect, we should have generated a smaller image, perhaps 
+ 64x64, but with higher quality (more realisations per sample count).
 
 \subsubsection{Implementation details}
 
@@ -1021,9 +1011,8 @@ Benedikt Bitterli for the tungsten renderer and the scenes used in this work.
 
 \appendix
 
-\section{Math tools}
+\section{Combination of statistic} \label{combi}
 
-\subsection{Combination of statistic} \label{combi}
 As described in \cite{Chan1983AlgorithmsFC} we can combine statistics easly.
 let $A$ be a set of sample and for $a\in A$, let $x_a$ be an observation. We note: 
 \[E(A) = \frac{\sum_{a\in A} x_a}{|A|}, \qquad V(A) = \frac{\sum_{a\in A} (E(A) - x_a)^2}{|A|}\]
@@ -1038,9 +1027,7 @@ using $A$ and $A\cup B$. Here the formula in the spacial case where $|A| = |B|$:
 \[ V(B) =  2 V(A\cup B) - V(A) - 0.5[E(A\cup B) - E(A)]^2\]
 
 
-\section{Image}
-
-\subsection{Denoiser} \label{denoiserImage}
+\section{Image}\label{denoiserImage}
 
 \begin{figure}[H]
     \centering
