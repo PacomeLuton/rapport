@@ -245,7 +245,7 @@ is that in order to reduce the error, most modern renderers use a
 low-discrepancy sequences like Sobol \cite{renderman} to generate random points.
 And these random points are correlated.
 
-\subsection{Adaptative Sampling}
+\subsection{Adaptive Sampling}
 
 \par Let $P$ be the number of pixels in the image and $I^{(p)}$ the integral of 
 the pixel $p$. When generating an image, we have $P$ integrals to compute, 
@@ -694,7 +694,7 @@ with $\epsilon=10^{-4}$ and the loss $\ell_2$.
 
 \subsubsection{Result}
 
-Here is an example of the prediction we got:
+Here is an example of the prediction of $a$ and $b$:
 \begin{figure}[H]
     \centering
     \caption{Predicted parameter $a$ and $b$ for the classroom scene}
@@ -707,8 +707,7 @@ Here is an example of the prediction we got:
     &groundtruth b & predicted b \\
     \end{tabular}
 \end{figure}
-And here what append when I use these prediction of $a$ and $b$ with the sampling
-function $\Sm_{min}$.
+And here is what happens when I use this prediction of $a$ and $b$ with the sampling function $\Sm_{min}$.
 \begin{figure}[H]
     \centering
     \caption{Comparaison of $\Sm_{min}$ using the prediction of $a$ and $b$, with $\Sm_{default}$}
@@ -730,29 +729,29 @@ function $\Sm_{min}$.
         \hline
     \end{tabular}
 \end{figure}
-In the first scene we have a improvement in the error, but in the second scene, we do 
-even worst than with the default sampling function $\Sm_{default}$. To summarize, our
-prediction of $a$ and $b$ combined with out $\Sm_{min}$ doesn't always reduce 
-the error.
+In the first scene we have an improvement in the error, but in the second scene we 
+do even worse than with the default sampling function $\Sm_{default}$. In 
+summary, our prediction of $a$ and $b$ combined with our $\Sm_{min}$ doesn't 
+always reduce the error.
 
-\paragraph*{Discussion} We haven't managed to make this idea fully work, 
- but the idea is promising. Maybe with more data we could get a better result. 
- Or maybe, with an image with low number of sample, we probably don't have 
- enough information to deduce the parameter $a$ and $b$, and we can't get 
- something any better even with more training. 
+\paragraph*{Discussion} We haven't managed to make this idea work, but it's a 
+promising one. Maybe with more data we could get a better result. Or maybe, 
+with an image with a small number of samples, we probably don't have enough 
+information to infer the parameters $a$ and $b$, and we can't get better even 
+with more training.
 
-\paragraph*{Perspective} To continue this section, we could have try to increass
-the size of the dataset, or improve the quality of our groundtruth $a$ and $b$, by maybe 
-a better regression algorithm. Or maybe try a different neural network architecture.
+\paragraph*{Perspective} To continue this section, we could have tried to increase 
+the size of the data set, or improve the quality of our ground truth 
+$a$ and $b$, perhaps by using a better regression algorithm. Or 
+perhaps try a different neural network architecture.
 
-\par This conclude the first part of my work during the intership.
-
+\par This concludes the first part of my work during the internship.
 
 \section{Adaptive sampling by direct optimisation}
 
 The goal of this section is to find a fake renderer that is designed to work
 with correlated samples. But before describing our fake renderer, let's first look at
-some properties of correlated samples when we use them in adaptative sampling.
+some properties of correlated samples when we use them in adaptive sampling.
 
 \subsection{Analysis on adaptive sampling with correlated samples}
 
