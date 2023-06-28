@@ -186,25 +186,25 @@ linked to the variance as
 
 \subsubsection{Stratified sampling}
 
-A technique to reduce the error, is to do a variante of Monte Carlo Integration, 
-called Quasi-Monte Carlo. Instead of taking $N$ \textbf{independant} random points $\{x_j\}_{j=1}^N$ 
+One technique to reduce the error, is to do a variant of Monte Carlo integration, 
+called Quasi-Monte Carlo. Instead of taking $N$ \textbf{independent} random points $\{x_j\}_{j=1}^N$ 
 uniformly distributed over the space $\mathbb A$, we take $N$ \textbf{correlated} random 
 points $\{x_j\}_{j=1}^N$ uniformly distributed over the space $\mathbb A$. Formally, 
 the variance of the estimator is now:
  
 \[ \V(I_N) = \V\left [\frac{1}{N}\sum_{j=1}^N f(x_j) \right ] = \frac{Var(f)}{N} + \frac{2}{N}\sum_{i\neq j} CoVar(f(x_i),f(x_j)) \]
 
-By a well chosen correlation, we hope that this will reduce the variance of our estimator and so the error
-of our estimation. 
+By choosing a good correlation, we hope to reduce the variance of our estimator and 
+thus the error of our estimate. 
 
-\par One of the known way of generate a good correlation, is to use stratified sample, like 
-a Sobol sequence, Halton sequence or Hammersley Sequence. The idea
-of stratified sampling is to distribute the sample all over the space.
+\par One of the known ways to generate a good correlation is to use a stratified sample, 
+such as a Sobol sequence, Halton sequence or Hammersley sequence. The 
+idea of stratified sampling is to spread the sample all across space.
 
 For simple integrals, the stratified sampler gives provably lower error and 
-faster asymptotic convergence \cite{10.1145/237170.237265}. And empirically,
-stratified samplers also give better rate of convergence for complex integrals that
-occur in rendering \cite{renderman}.
+faster asymptotic convergence \cite{10.1145/237170.237265}. And empirically, 
+stratified samplers also give a better rate of convergence for the complex 
+integrals that occur in rendering \cite{renderman}.
 
 \paragraph*{Summary} What is important to remember to understand this work is that 
 in order to reduce the error, most of the modern renderer use a stratified sequence like 
