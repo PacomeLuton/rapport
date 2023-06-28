@@ -766,7 +766,7 @@ with these new samples is the ground truth. This simple property no
 longer holds when we have a correlated sample.
 \par Let's look at an example in two dimensions with a fully stratified 
 sequence, like the one in \cite{10.2312:sr.20211287}. Suppose we already 
-have a know where where our first samples are in blue, the news samples 
+have a know where where our first samples are in blue and the news samples 
 are in red.
 
 \begin{center}
@@ -796,20 +796,21 @@ are in red.
 \end{center}
 The green part shows where the next sample can be. And as our sampler is stratified,
 with the knowledge of where was our first sample, we know that the second sample can only
-be in a quarter of the domain. That's why the expectation of this realisation is not the
-the groundtruth, but only the true integrale of the corresponding quarter of the image.
-\par Formally it is just that $\E(x_j | x_{j-1},\dots,x_1) != \E(x_j)$. Thus, In
-most of the case $\E[f(x_j)] \neq I(f)$. This is just the defition of correlation.
+be in a quarter of the domain. That's why the expectation of this realisation is not the 
+ground truth, but only the integral of the corresponding quarter of the pixel space.
+
+\par Formally it is just that $\E(x_j | x_{j-1},\dots,x_1) != \E(x_j)$. So in
+most of the cases $\E[f(x_j)] \neq I(f)$. By defition of correlation.
 
 \par With this in mind, we can see that the analysis done by \cite{10.1145/3550454.3555515}
-isn't really possible with correlated samples as in order to make the second order approximation
-of the distribution of the next sample, we need to compute integral on each of 
-those subdomain where the next sample can be, for every sample of the correlated sequence. This
-is computationally to expensive.
+isn't really possible with correlated samples. Because in order to make the second order 
+approximation of the distribution of the next sample, we need to compute the true integral on 
+each of those subdomains where the next sample can be, and we need to do this for every sample 
+of the correlated sequence. This is computationally too expensive.
 
-\paragraph*{Discussion} The combination of images from different number of samples per pixel 
-as done in \cite{kuznetsov2018deep} is not possible either. Thus, we needed to find a really 
-different fake renderer in order to work with correlated samples.
+\paragraph*{Discussion} Combining images with different numbers of samples per pixel, 
+as done in \cite{kuznetsov2018deep}, is also not possible with correlated samples. 
+So we had to find a different fake renderer to work with.
 
 \subsection{The derivation issue}
 
@@ -823,8 +824,8 @@ Let's take a closer look at the derivation of the equation \ref{eq:4}:
     & =\:???
 \end{align*}
 The issue we have, is that $\E_h \left [\R(X,h | s) \right ]$ not only is not $X_\infty$ 
-but also depends on $h$. In pratice, we don't really know what is this expectation, so we
-shouldn't really apply this technique to compute gradient.
+but also depends on $h$. In practice, we don't really know what this expectation is, so we 
+shouldn't really use this technique to compute the gradient.
 
 \paragraph*{Confession of weakness} We know that we have this issue, but we haven't found 
 a way to get a better final result, than with the approximation that 
@@ -835,7 +836,7 @@ enough, and so the network converges in a direction that reduces the error.
 \subsection{Interpolation}
 
 I can now introduce the fake renderer that we used, the only ways we found that can
-take into account the fact that we used correlated sequence and not independent sample
+take into account the fact that we used a correlated samples and not an independent samples
 is to generate images $X_{2^0}$, $X_{2^1}$, \dots, $X_{2^k}$, where $2^k$ is a large number
 with the same sequence but with different sample count. And then interpolate for 
 $n = 2^i + j$ ($j < 2^i$):
@@ -844,12 +845,13 @@ $n = 2^i + j$ ($j < 2^i$):
     \R_i(X,n) = \frac{2^i X_{2^i} + j X_{2^{i+1} | 2^i}}{n}
 \end{equation}
 where $X_{2^{i+1} | 2^i}$ is the image using $2^i$ samples of the sequence starting at 
-$2^i$. The way to compute this from $X_{2^i}$ and $X_{2^{i+1}}$ is described in Appendix \ref{combi}.
+$2^i$. The way to compute this from $X_{2^i}$ and $X_{2^{i+1}}$ is described in the Appendix \ref{combi}.
 
-\paragraph*{Discussion} This interpolation has many flaws, but it seems to be 
- the best way to approximation of the true renderer, that take into 
- account the fact that our samples are correlated. For most of the correlated sequence used, 
- we have $\E[R_i(X,n)] \approx \E[R(X,n)]$ and $\V[R_i(X,n)] \approx \V[R(X,n)]$.
+\paragraph*{Discussion} This interpolation has many flaws, but it seems to be the 
+best way to approximate the true renderer that takes into account the fact that 
+our samples are correlated. For a classical correlated sequence used in the 
+renderer, such as a Sobol sequence, we have $\E[R_i(X,n)] \approx \E[R(X,n)]$ 
+and $\V[R_i(X,n)] \approx \V[R(X,n)]$.
 
 \subsection{Implementation Details}
 
@@ -858,11 +860,13 @@ our results. I trained two networks, one for the denoiser and one
 for the sampler.
 
 \paragraph*{Network details} I used two simple UNET for the sampler and the denoiser, 
-it is the same architecture ad in the previous section and in \cite{kuznetsov2018deep}. 
-The sampler outputs a single channel image representing the sampling map. And the denoiser
-outputs a $13\times13$ channel image that represents a kernel of denoising as it 
-is better than directly predicting the correct color in \cite{10.1145/3072959.3073708}.
-Here is an example of my denoiser:
+it is the same architecture as in the previous section and in \cite{kuznetsov2018deep}. 
+The sampler outputs a single channel image representing the sampling map. And the denoiser 
+outputs a $13\times13$ channel image representing a kernel of denoising. For each pixel, 
+it predicts a kernel to apply to the pixel's neighbours to get a denoised version of the 
+image. I predict a kernel instead of directly the colour of the denoised image, because 
+this is better according to \cite{10.1145/3072959.3073708}. Here is an example of my 
+denoiser:
 
 \begin{figure}[H]
     \centering
@@ -874,7 +878,7 @@ Here is an example of my denoiser:
     noisy (2 spp) & kernelmap & denoised & groundtruth \\
     \end{tabular}
 \end{figure}
-A bigger image of this figure can be found in the annexe \ref{denoiserImage}:
+A larger image of this figure can be found in the Appendix \ref{denoiserImage}:
 
 \paragraph*{Dataset} I used 200 variations of scenes from \cite{resources16}, using 
 the Tungsten renderer. I rendered at 256x256 resolution, with a ground 
@@ -882,22 +886,22 @@ truth of 65536 samples. For the input of our fake renderer, we also
 compute a cascade of images with power two samples per pixel using the 
 same sequence.
 
-\paragraph*{Training detail} I did the same thing as in \cite{kuznetsov2018deep}, since the range of color and albedo
-is really large, I compress them by using a logarithm. $color -> \log(1+color)$. I chose to pass
-as input of our network the color, albedo and the normal map with their respective variance. I also chose to 
-pass the variance because, as suggested by classical methods without learning, the variance of 
-the color is directly related to the error. In this way, the input 
+\paragraph*{Training detail} I did the same thing as in \cite{kuznetsov2018deep}, but since the range of colour and albedo
+is really large, I compress them by using a logarithm. $colour -> \log(1+colour)$. I chose to pass
+as input of our network the colour, the albedo and the normal map with their respective variance. I also chose to 
+pass the variance because, as classical methods without learning suggest, the variance of 
+the colour is directly related to the error. In this way, the input 
 of my network is close to what Bako has done in
 \cite{10.1145/3072959.3073708}.
-To summarize the entry of both of our network (denoiser and sampler) are:
-\[x = (\log(1+color), \log(1+albedo), normal, \log(1+\V(color)), \log(1+\V(albedo)),  \V(normal)) \]
+To summarise, the entry of both of our network (denoiser and sampler) are:
+\[x = (\log(1+colour), \log(1+albedo), normal, \log(1+\V(colour)), \log(1+\V(albedo)),  \V(normal)) \]
 \begin{figure}[H]
     \centering
     \begin{tabular}{ccc}
     \includegraphics[width=45mm]{image/networkInput/color.png}
     & \includegraphics[width=45mm]{image/networkInput/albedo.png}
     & \includegraphics[width=45mm]{image/networkInput/normal.png} \\
-    color & albedo & normal\\
+    colour & albedo & normal\\
 \end{tabular}
 \end{figure}
 \begin{figure}[H]
@@ -906,11 +910,11 @@ To summarize the entry of both of our network (denoiser and sampler) are:
     \includegraphics[width=45mm]{image/networkInput/colorV.png}
     & \includegraphics[width=45mm]{image/networkInput/albedoV.png}
     & \includegraphics[width=45mm]{image/networkInput/normalV.png} \\
-    color variance & albedo variance & normal variance
+    colour variance & albedo variance & normal variance
 \end{tabular}
 \end{figure}
 
-Like in \cite{kuznetsov2018deep} and \cite{10.1145/3550454.3555515}, I divided the training
+As in \cite{kuznetsov2018deep} and \cite{10.1145/3550454.3555515}, I divided the training
 into three phases. In each phase, the batch size is 8, with the Adam optimiser \cite{kingma2017adam}
 with $\epsilon = 10^{-4}$ for the gradient descent..
 \begin{itemize}
@@ -921,17 +925,17 @@ with $\epsilon = 10^{-4}$ for the gradient descent..
 \end{itemize}
 The full training took one day.
 
-\paragraph*{Loss} I used the same loss function $\Los$ as in \cite{kuznetsov2018deep}.
+\paragraph*{Loss} I have used the same loss function $\Los$ as in \cite{kuznetsov2018deep}.
 \begin{equation}
     \label{eq:6}
     \Los(\hat c,c) = 0.5\Los_s(\hat c,c) + 0.5\Los_g(\hat c,c) 
 \end{equation}
-with a $Los_s$ is a $\ell_1$ loss to ensure the pixel have the right color:
+with a $Los_s$ is a loss of $\ell_1$ to make sure that the pixel will have the correct colour:
 \begin{equation}
     \label{eq:7}
     \Los_s(\hat c,c) = \frac{\lVert \log(1+\hat c) - \log(1+c) \rVert_1}{|c| + \epsilon}
 \end{equation}
-and with $Los_g$ is loss on the gradient to ensure the sharpness of the edge explain in \cite{5617283}.
+and where $Los_g$ is the loss on the gradient to ensure the sharpness of the edge, as explained in \cite{5617283}.
 \begin{equation}
     \label{eq:8}
     \Los_s(\hat c,c) = \frac{\lVert g(\log(1+\hat c)) - g(\log(1+c)) \rVert_1}{|c| + \epsilon}
@@ -939,19 +943,19 @@ and with $Los_g$ is loss on the gradient to ensure the sharpness of the edge exp
 
 \subsection{Experimental result}
 
-\paragraph*{Information} This section need still active work, 
-I still have a full month to do a proper analysis, but
-here is a less rigourus analysis of of result, as I have to send 
-the report now, but a better analysis will be done in the futur.
+\paragraph*{Information} This section still needs active work, I still have a full 
+month to do a proper analysis, but here is a less rigorous analysis of the result, 
+as I have to send the report now, but a better analysis will be done in the futur.
 
-In order to mesure if our sampler is working correctly, we can to compare our method 
-that is specially adapted to correlated samples, with DARS using correlated samples. I will compare
-the sampling function $\Sm_{ours}$ that result of ours optimisation, with the sampling 
-function $\Sm_{c}$ that result from the optimisation with the fake renderer discribe in DARS \cite{kuznetsov2018deep}.
-In order to have a fair comparaison, I trained DARS with the exact same dataset 
-and with the same number of iteration.
+To measure whether our sampler is working correctly, we can compare our method, 
+which is specially adapted to correlated samples, with DARS using correlated 
+samples. I will compare the sampling function $\Sm_{ours}$ resulting from our 
+optimisation with the sampling function $\Sm_{c}$ resulting from the optimisation 
+with the fake renderer described in DARS \cite{kuznetsov2018deep}. In order to 
+have a fair comparison, I trained DARS with the exact same dataset and the same 
+number of iterations.
 
-Let's look at the spaceship and the staircase scenes:
+Let's take a look at the spaceship and staircase scenes:
 \begin{figure}[H]
     \centering
     \begin{tabular}{cc}
@@ -960,7 +964,7 @@ Let's look at the spaceship and the staircase scenes:
     \end{tabular}
 \end{figure}
 
-We can compare the error level for those two scene with sampling map that comes from $\Sm_{ours}$, $\Sm_{c}$.
+We can compare the error level for these two scenes with the sampling map that comes from $\Sm_{ours}$, $\Sm_{c}$.
 
 \begin{figure}[H]
     \centering
@@ -995,24 +999,24 @@ We can compare the error level for those two scene with sampling map that comes 
 \end{tabular}
 \end{figure}
 
-\paragraph*{Discussion} For now, the different between the two method 
-isn't really clear. All I can say is that it seems that our sampling function is
-as good as the one generated by DARS \cite{kuznetsov2018deep}. But it's doesn't seems
-to be better. With more control scene, I will be able to produce an more precise evaluation
-of both method.
+\paragraph*{Discussion} At the moment, the difference between the two methods 
+isn't really clear. All I can say is that it seems that our sampling function 
+is as good as the one generated by DARS \cite{kuznetsov2018deep}. But it doesn't 
+seem to be better. With more control scenes I will be able to make a more precise 
+evaluation of both methods.
 
 \section{Conclusion}
 
-In this work, we tried to find new way of finding good sampling function, that are especially
-designed for correlated samples. We didn't manage to make a significant improvement, but their
-is encouraging result, as it seems to be as good as the actual state of the art. To summarize,
-it was a really fun internship, in which I learned a lot on neural network and on adaptative
-sampling.
+In this work, we have tried to find new sampling functions specifically designed 
+for correlated samples. We didn't manage to make a significant improvement, but 
+the result is encouraging as it seems to be as good as the current state of the 
+art. To sum up, it was a really fun internship where I learnt a lot about neural 
+networks and adaptive sampling.
 
-\paragraph*{Acknowledgements} I gratefully acknowledge support from the 
+\paragraph*{Acknowledgements} We gratefully acknowledge support from the 
 CNRS/IN2P3 Computing Center (Lyon - France) for providing computing and 
-data-processing resources needed for this work. We also would like to thank 
-Benedikt Bitterli for the tungsten renderer and the scenes used in this paper.
+data-processing resources needed for this work. I would also like to thank 
+Benedikt Bitterli for the tungsten renderer and the scenes used in this work.
 
 \printbibliography
 
