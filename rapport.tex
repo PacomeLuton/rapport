@@ -116,7 +116,7 @@ the approximation to the true integral.
 \par Simply put, we do a Monte Carlo numerical integration for each pixel 
 of the image. And each numerical integration converges more or less quickly. 
 For example, if a pixel only see to a light, we have a good approximation 
-of the integral directly with a single photon path. But for a pixel see a dark 
+of the integral directly with a single photon path. But for a pixel that see a dark 
 region under a table, we have to simulate several photon paths to take into account
 all the global illumination and have a good approximation of the true integral.
 
@@ -421,12 +421,12 @@ the following relationship for each pixel $p$ \cite{10.1145/237170.237265}:
     \label{eq:99}
     e_p = \frac{b_p}{n_p^{a_p}}
 \end{equation}
-where $e_p$ is the square $\ell_2$ error, $n_p$ is the number of samples, 
+where $e_p$ is expectation of the square $\ell_2$ error, $n_p$ is the number of samples, 
 and $a_p$, $b_p$ are two parameters that depend on the function we are 
 integrating and the random sequence we are using. With our formalism 
 \ref{eq:1}, with a linear loss on each pixel (the loss is the sum of 
 the losses on each pixel), we have:
-\[ \Los(\R(X,n)_p, X_\infty) = \frac{b_p}{n_p^{a_p}} \]
+\[ \E[\Los(\R(X,n)_p, X_\infty)] = \frac{b_p}{n_p^{a_p}} \]
 with $n$ by $\Sm(X_m, B)$. Now we have a formulation that is no longer 
 dependent on the renderer.
 
@@ -783,8 +783,8 @@ the groundtruth, but only the true integrale of the corresponding quarter of the
 \par With this in mind, we can see that the analysis done by \cite{10.1145/3550454.3555515}
 isn't really possible with stratified samples as it is already difficult to make an order 1 approximation of 
 the distribution of next sample, it depends on the number of sample we already used. 
-And as we are using sample in high dimension, we don't want to compute the exact green 
-area where the next sample can be. Thus we can't know the true expectation of $\E_h[\R(X,h | s)]$.
+And as we are using sample in high dimension, we don't want to compute integral on each of 
+those subdomain where the next sample can be. Thus we can't know the true expectation of $\E_h[\R(X,h | s)]$.
 
 \paragraph*{Discussion} The combination of images from different number of samples per pixel 
 as done in \cite{kuznetsov2018deep} is not possible either. Thus, we needed to find a really 
